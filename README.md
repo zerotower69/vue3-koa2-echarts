@@ -1,2 +1,3 @@
-# vue3-koa2-echarts
-vue3+echarts 电商大屏可视化实战项目
+# 项目说明
+
+这是我第一次尝试使用 echarts 进行项目实战，同时结合了 vue3 来使用
