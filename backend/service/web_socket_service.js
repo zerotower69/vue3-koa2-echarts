@@ -21,11 +21,12 @@ const wss = new WebSocket.Server({
 // server open watch
 module.exports.listen = () => {
     wss.on('connection', client => {
-        // console.log('client connect successfully!');
+        console.log('client connect successfully!');
         client.on('message', async (msg) => {
             //整个核心代码在这里！
             try {
                 let payload = JSON.parse(msg);
+                console.log("payload==>", payload);
                 const action = payload.action;
                 if (action === 'getData') {
                     //get the chart data
