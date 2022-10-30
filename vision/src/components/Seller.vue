@@ -73,7 +73,6 @@ const initChart = () => {
     series: [
       {
         type: 'bar',
-        barWidth: 66,
         label: {
           show: true,
           position: 'right',
@@ -82,7 +81,6 @@ const initChart = () => {
           }
         },
         itemStyle: {
-          barBorderRadius: [0, 33, 33, 0],
           // 线性渐变
           color: new graphic.LinearGradient(0, 0, 1, 0, [
             {

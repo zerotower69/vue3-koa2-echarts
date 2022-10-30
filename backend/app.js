@@ -16,3 +16,7 @@ app.use(respDataMidlleware)
 app.listen(8888, function () {
     consola.success('listen on 8888 successfully!')
 })
+
+const webSocketService = require('./service/web_socket_service')
+
+webSocketService.listen()
