@@ -5,7 +5,7 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, onBeforeMount } from "vue";
-import { EChartsType, EChartsOption, graphic } from "echarts";
+import { EChartsType, EChartsOption, graphic, time } from "echarts";
 import { render } from "@/utils/chart";
 import request from "@/utils/request";
 import { useSocket } from "@/utils/socket_service";
@@ -51,7 +51,7 @@ onUnmounted(() => {
 const initChart = () => {
   instance = render(seller.value, "chalk");
   // 对图表初始化配置的控制
-  const initOption = {
+  const initOption: EChartsOption = {
     title: {
       text: "┃ 商家销售统计",
       textStyle: {
@@ -166,6 +166,9 @@ const updateChart = () => {
   instance?.setOption(dataOption);
 };
 const startInterval = () => {
+  if (timer) {
+    clearInterval(timer);
+  }
   timer = setInterval(() => {
     currentPage.value++;
     if (currentPage.value > totalPage.value) {
@@ -179,7 +182,7 @@ const startInterval = () => {
  */
 const screenAdapter = () => {
   const titleFontSize = ((seller.value?.offsetWidth ?? 0) / 100) * 3.6;
-  const adapterOption = {
+  const adapterOption: EChartsOption = {
     title: {
       textStyle: {
         fontSize: titleFontSize,
@@ -197,7 +200,7 @@ const screenAdapter = () => {
       {
         barWidth: titleFontSize,
         itemStyle: {
-          barBorderRadius: [0, titleFontSize / 2, titleFontSize / 2, 0],
+          borderRadius: [0, titleFontSize / 2, titleFontSize / 2, 0],
         },
       },
     ],

@@ -19,6 +19,9 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/rankPage',
     component:()=>import('@/views/RankPage.vue')
+  }, {
+    path: '/hotPage',
+    component:()=>import('@/views/HotPage.vue')
   }
 ]
 

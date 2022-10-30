@@ -18,18 +18,18 @@
       let ws = null;
       send.disabled = true;
       connect.onclick = function () {
-        console.log("click connect...");
+        // console.log("click connect...");
         ws = new WebSocket("ws://192.168.2.87:9998");
         ws.onopen = () => {
           console.log("connect server successfully!");
           send.disabled = false;
         };
         ws.onclose = () => {
-          console.log("connect server failed!");
+          //   console.log("connect server failed!");
           send.disabled = true;
         };
         ws.onmessage = (msg) => {
-          console.log("get message from server......");
+          //   console.log("get message from server......");
           console.log(msg.data);
           recv.textContent = msg.data;
         };
