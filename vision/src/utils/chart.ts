@@ -8,6 +8,10 @@ export function render (el: HTMLElement | null, theme:string) {
   }
 }
 
+export function addMap(name: string, data: any) {
+  echarts.registerMap(name,data)
+ }
+
 echarts.registerTheme('chalk', {
   color: [
     '#0ba82c',

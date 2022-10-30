@@ -34,7 +34,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "src/utils/map_utils.js"  ],
   "exclude": [
     "node_modules"
   ]
