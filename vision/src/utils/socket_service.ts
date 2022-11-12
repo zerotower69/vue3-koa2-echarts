@@ -61,11 +61,11 @@ export default class SocketService {
                 const action = recvData.action;
                 if (action === 'getData') {
                     const realData = JSON.parse(recvData.data);
-                    this.callbackMapping[socketType].call(this,realData)
+                    this.callbackMapping[socketType].call(this, realData);
                 } else if (action === 'fullScreen') {
                     this.callbackMapping[socketType].call(this, recvData);
                 } else if (action === 'themeChange') {
-                    //TODO:
+                    this.callbackMapping[socketType].call(this, recvData);
                 }
             }
         }

@@ -4,6 +4,7 @@ const theme:Record<string,Record<string,string>> = {
     backgroundColor: '#161522',
     // 标题的文字颜色
     titleColor: '#ffffff',
+    titleBackGroundColor:"#000000",
     // 左上角logo的图标路径
     logoSrc: 'logo_dark.png',
     // 切换主题按钮的图片路径
@@ -17,6 +18,7 @@ const theme:Record<string,Record<string,string>> = {
     backgroundColor: '#eeeeee',
     // 标题的文字颜色
     titleColor: '#000000',
+    titleBackGroundColor:"#ffffff",
     // 左上角logo的图标路径
     logoSrc: 'logo_light2.png',
     // 切换主题按钮的图片路径

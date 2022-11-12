@@ -220,12 +220,11 @@ const recvThemeChange = () => {
 };
 //手动修改主题
 const handleChangeTheme = () => {
-  useMainStore().changeTheme();
+  //   useMainStore().changeTheme();
   useSocket()?.send({
     action: "themeChange",
     socketType: "themeChange",
     chartName: "",
-    value: "",
   });
 };
 </script>

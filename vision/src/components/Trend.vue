@@ -75,8 +75,11 @@ const comStyle = computed(() => {
 const marginStyle = computed(() => {
   return {
     marginLeft: titleFontSize.value + "px",
+    backGroundColor: getThemeValue(theme.value).titleBackGroundColor,
   };
 });
+
+// const selectItemColor = computed(() => {});
 //标题额字体大小
 const titleFontSize = ref(0);
 
