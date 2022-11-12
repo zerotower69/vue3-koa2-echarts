@@ -1,0 +1,19 @@
+{
+  "version": "2.0",
+  "envId": "blog-4gir71iy91260846",
+  "framework": {
+    "name": "koa-starter",
+    "plugins": {
+      "node": {
+        "use": "@cloudbase/framework-plugin-node",
+        "inputs": {
+          "name": "koa-starter",
+          "path": "/koa-starter"
+        }
+      }
+    }
+  },
+  "functionRoot": "./functions",
+  "functions": [],
+  "region": "ap-shanghai"
+}
