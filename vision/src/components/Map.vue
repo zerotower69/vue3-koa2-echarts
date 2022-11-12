@@ -5,17 +5,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, onUnmounted, nextTick } from "vue";
+import {
+  ref,
+  reactive,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  defineExpose,
+  watch,
+} from "vue";
 import { ECharts } from "echarts";
 import axios from "axios";
 import { render, addMap } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
 import { getProvinceMapInfo } from "@/utils/map_utils";
+import { computed } from "@vue/reactivity";
+import { useMainStore } from "@/store";
 // import { $ref } from "vue/macros";
 const mapEl = ref<HTMLElement | null>(null);
 let instance: ECharts | null = null;
-let allData: Array<Record<string, any>> | null = null;
+let allData = reactive<any>([]);
 const mapData: Record<string, any> = {};
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
+});
 onBeforeMount(() => {
   useSocket()?.registerCallback("mapData", getData);
 });
@@ -30,6 +53,7 @@ onMounted(() => {
     value: "",
   });
   window.addEventListener("resize", screenAdapter);
+  screenAdapter();
 });
 
 onUnmounted(() => {
@@ -39,7 +63,7 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = async () => {
-  instance = render(mapEl.value, "chalk");
+  instance = render(mapEl.value, theme.value);
   //获取中国地图的矢量数据
   //由于我们的数据放在前台而不是koa2,
   const ret = await (
@@ -124,7 +148,6 @@ const updateChart = () => {
     };
   });
   const legendArr = allData?.map((item: any) => item.name);
-  //   console.log("array==>", seriesArr);
   const dataOption = {
     series: seriesArr,
     legend: {
@@ -165,4 +188,8 @@ const restoreMap = () => {
   };
   instance?.setOption(restoreOption);
 };
+
+defineExpose({
+  screenAdapter,
+});
 </script>

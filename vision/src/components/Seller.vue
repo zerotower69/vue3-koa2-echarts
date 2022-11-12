@@ -4,22 +4,42 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, onBeforeMount } from "vue";
-import { EChartsType, EChartsOption, graphic, time } from "echarts";
+import {
+  onMounted,
+  onUnmounted,
+  ref,
+  reactive,
+  onBeforeMount,
+  defineExpose,
+  computed,
+  watch,
+} from "vue";
+import { EChartsType, EChartsOption, graphic } from "echarts";
 import { render } from "@/utils/chart";
-import request from "@/utils/request";
 import { useSocket } from "@/utils/socket_service";
-
+import { useMainStore } from "@/store";
 type dataItem = {
   name: string;
   value: number;
 };
 let instance: EChartsType | null = null;
-let allData: any = null;
+let allData = reactive<Array<any>>([]);
 const seller = ref<HTMLDivElement | null>(null); // div el
 const currentPage = ref(1);
 const totalPage = ref(0);
 let timer: any = null;
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
+});
 onBeforeMount(() => {
   //注册回调函数
   useSocket()?.registerCallback("sellerData", getData);
@@ -49,7 +69,7 @@ onUnmounted(() => {
  * 初始化echartInstance对象
  */
 const initChart = () => {
-  instance = render(seller.value, "chalk");
+  instance = render(seller.value, theme.value);
   // 对图表初始化配置的控制
   const initOption: EChartsOption = {
     title: {
@@ -90,9 +110,7 @@ const initChart = () => {
         label: {
           show: true,
           position: "right",
-          textStyle: {
-            color: "white",
-          },
+          color: "white",
         },
         itemStyle: {
           // 线性渐变
@@ -208,4 +226,7 @@ const screenAdapter = () => {
   instance?.setOption(adapterOption);
   instance?.resize();
 };
+defineExpose({
+  screenAdapter,
+});
 </script>

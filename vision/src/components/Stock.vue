@@ -5,15 +5,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, onUnmounted } from "vue";
+import { ref, onBeforeMount, onMounted, onUnmounted, defineExpose, watch } from "vue";
 import { ECharts, EChartsOption, graphic, SeriesOption } from "echarts";
 import { render } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
+import { computed } from "@vue/reactivity";
+import { useMainStore } from "@/store";
 // import { $ref } from "vue/macros";
 const stock_ref = ref<HTMLElement | null>(null);
-const instance = ref<ECharts | null>(null);
+let instance: ECharts | null = null;
 const allData = ref<Array<any>>([]);
 const timer = ref<number | null>(null);
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
+});
 onBeforeMount(() => {
   useSocket()?.registerCallback("stockData", getData);
 });
@@ -38,7 +52,7 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = () => {
-  instance.value = render(stock_ref.value, "chalk");
+  instance = render(stock_ref.value, theme.value);
   const initOption: EChartsOption = {
     title: {
       text: "▎ 库存和销量分析",
@@ -46,12 +60,12 @@ const initChart = () => {
       left: 20,
     },
   };
-  instance.value?.setOption(initOption);
+  instance?.setOption(initOption);
   //鼠标移动到图表的上方终止定时器，否则启动定时器
-  instance.value?.on("mouseover", () => {
+  instance?.on("mouseover", () => {
     timer.value && clearInterval(timer.value);
   });
-  instance.value?.on("mouseout", () => {
+  instance?.on("mouseout", () => {
     startInterval();
   });
 };
@@ -144,9 +158,9 @@ const updateChart = () => {
   const dataOption = {
     series: seriesArr,
   };
-  // instance.value?.dispose();
-  // instance.value = render(stock_ref.value, "chalk");
-  instance.value?.setOption(dataOption);
+  // instance?.dispose();
+  // instance = render(stock_ref.value, "chalk");
+  instance?.setOption(dataOption);
 };
 
 const screenAdapter = () => {
@@ -171,8 +185,8 @@ const screenAdapter = () => {
     },
     series: seriesArr,
   };
-  instance.value?.setOption(adapterOption);
-  instance.value?.resize();
+  instance?.setOption(adapterOption);
+  instance?.resize();
 };
 const startInterval = () => {
   timer.value && clearInterval(timer.value);
@@ -185,4 +199,7 @@ const startInterval = () => {
     screenAdapter();
   }, 5000);
 };
+defineExpose({
+  screenAdapter,
+});
 </script>

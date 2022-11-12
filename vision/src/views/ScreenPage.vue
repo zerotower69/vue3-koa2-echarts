@@ -1,58 +1,106 @@
 <template>
   <div class="screen-container" :style="containerStyle">
-    <header class="screen-header"></header>
+    <header class="screen-header">
+      <div>
+        <img :src="headerSrc" alt="" />
+      </div>
+      <span class="logo">
+        <img :src="logoSrc" alt="" />
+      </span>
+      <span class="title">电商平台实时监控系统</span>
+      <div class="title-right">
+        <img :src="themeSrc" class="qiehuan" @click="handleChangeTheme" />
+        <span class="datetime">{{ datetime }}</span>
+      </div>
+    </header>
     <div class="screen-body">
       <section class="screen-left">
-        <div id="left-top" :class="[fullScreenStatus.trend ? 'fullScreen' : '']">
+        <div id="left-top" :class="[fullScreenStatus.trend ? 'fullscreen' : '']">
           <!-- 销量趋势图表 -->
           <Trend ref="trend"></Trend>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('trend')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.trend ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('trend')"
+            ></span>
           </div>
         </div>
-        <div id="left-bottom" :class="[fullScreenStatus.seller ? 'fullScreen' : '']">
+        <div id="left-bottom" :class="[fullScreenStatus.seller ? 'fullscreen' : '']">
           <!-- 商家销售金额图表 -->
           <Seller ref="seller"></Seller>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('seller')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.seller ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('seller')"
+            ></span>
           </div>
         </div>
       </section>
       <section class="screen-middle">
-        <div id="middle-top" :class="[fullScreenStatus.map ? 'fullScreen' : '']">
+        <div id="middle-top" :class="[fullScreenStatus.map ? 'fullscreen' : '']">
           <!-- 商家分布图表 -->
           <Map ref="map"></Map>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('map')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.map ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('map')"
+            ></span>
           </div>
         </div>
-        <div id="middle-bottom" :class="[fullScreenStatus.rank ? 'fullScreen' : '']">
+        <div id="middle-bottom" :class="[fullScreenStatus.rank ? 'fullscreen' : '']">
           <!-- 地区销量排行图表 -->
           <Rank ref="rank"></Rank>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('rank')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.rank ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('rank')"
+            ></span>
           </div>
         </div>
       </section>
       <section class="screen-right">
-        <div id="right-top" :class="[fullScreenStatus.hot ? 'fullScreen' : '']">
+        <div id="right-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
           <!-- 热销商品占比图表 -->
           <Hot ref="hot"></Hot>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('hot')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.hot ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('hot')"
+            ></span>
           </div>
         </div>
-        <div id="right-bottom" :class="[fullScreenStatus.stock ? 'fullScreen' : '']">
+        <div id="right-bottom" :class="[fullScreenStatus.stock ? 'fullscreen' : '']">
           <!-- 库存销量分析图表 -->
           <Stock ref="stock"></Stock>
           <div class="resize">
             <!-- icon -->
-            <span @click="changeSize('stock')"></span>
+            <span
+              :class="[
+                'iconfont',
+                fullScreenStatus.stock ? 'icon-compress-alt' : 'icon-expand-alt',
+              ]"
+              @click="changeSize('stock')"
+            ></span>
           </div>
         </div>
       </section>
@@ -67,11 +115,20 @@ import Seller from "@/components/Seller.vue";
 import Stock from "@/components/Stock.vue";
 import Rank from "@/components/Rank.vue";
 import { useSocket } from "@/utils/socket_service";
-import { onMounted, onBeforeMount, onUnmounted, reactive, computed } from "vue";
-import { useStore, mapState } from "vuex";
+import {
+  onMounted,
+  onBeforeMount,
+  onUnmounted,
+  reactive,
+  computed,
+  ref,
+  getCurrentInstance,
+  nextTick,
+} from "vue";
+import { useMainStore } from "@/store";
 import { getThemeValue } from "@/utils/theme_utils";
 //定义每一个图表的一个全屏状态
-const fullScreenStatus = reactive({
+let fullScreenStatus = reactive<Record<string, boolean>>({
   trend: false,
   seller: false,
   map: false,
@@ -80,23 +137,48 @@ const fullScreenStatus = reactive({
   stock: false,
 });
 
+interface CustomMethods {
+  screenAdaptor: () => void;
+}
+
 onBeforeMount(() => {
   //注册接收到数据的回调函数
   useSocket()?.registerCallback("fullScreen", recvData);
   useSocket()?.registerCallback("themeChange", recvThemeChange);
 });
-
+onMounted(() => {
+  console.log(getCurrentInstance()?.refs);
+});
 onUnmounted(() => {
   useSocket()?.unRegisterCallback("fullScreen");
   useSocket()?.unRegisterCallback("themeChange");
 });
 
-const theme = computed(() => useStore().state.theme);
+const theme = computed(() => useMainStore().theme);
 const logoSrc = computed(() => "/static/img/" + getThemeValue(theme.value).logoSrc);
 const headerSrc = computed(
   () => "/static/img/" + getThemeValue(theme.value).headerBorderSrc
 );
 const themeSrc = computed(() => "/static/img/" + getThemeValue(theme.value).themeSrc);
+
+const datetime = computed(() => {
+  const dateObj = new Date();
+  const year = dateObj.getFullYear();
+  let month: number | string = dateObj.getMonth() + 1;
+  let date: number | string = dateObj.getDate();
+  month = filter(month);
+  date = filter(date);
+  function filter(value: any) {
+    return value < 10 ? "0" + value : "" + value;
+  }
+  let hour: number | string = dateObj.getHours();
+  let minite: number | string = dateObj.getMinutes();
+  let second: number | string = dateObj.getSeconds();
+  hour = filter(hour);
+  minite = filter(minite);
+  second = filter(second);
+  return year + "-" + month + "-" + date + " " + hour + ":" + minite + ":" + second;
+});
 
 const containerStyle = computed(() => {
   return {
@@ -104,17 +186,41 @@ const containerStyle = computed(() => {
     color: getThemeValue(theme.value).titleColor,
   };
 });
-
+const vm = getCurrentInstance();
 // console.log("logoSrc===>", logoSrc.value);
-const changeSize = (chartName: string) => {};
+const changeSize = (chartName: string) => {
+  //   console.log(fullScreenStatus.value);
+  fullScreenStatus[chartName] = !fullScreenStatus[chartName];
+  //   toRef("fullScreenStatus", fullScreenStatus);
+  nextTick(() => {
+    vm?.refs[chartName]?.screenAdapter();
+  });
+  const targetValue = fullScreenStatus[chartName];
+  useSocket()?.send({
+    action: "fullScreen",
+    socketType: "fullScreen",
+    chartName: chartName,
+    value: targetValue,
+  });
+};
 //接受到全屏数据的处理
-const recvData = (data: Record<string, any>) => {};
+const recvData = (data: Record<string, any>) => {
+  //   console.log("fullScreen===>", data);
+  //哪个图表
+  const chartName = data.chartName;
+  const targetValue = data.value;
+  fullScreenStatus[chartName] = targetValue;
+  nextTick(() => {
+    vm?.refs[chartName]?.screenAdapter();
+  });
+};
 //接受到主题改变的做些什么
 const recvThemeChange = () => {
-  useStore().commit("changeTheme");
+  useMainStore().changeTheme();
 };
 //手动修改主题
 const handleChangeTheme = () => {
+  useMainStore().changeTheme();
   useSocket()?.send({
     action: "themeChange",
     socketType: "themeChange",
@@ -125,12 +231,12 @@ const handleChangeTheme = () => {
 </script>
 
 <style lang="less" scoped>
-.fullScreen {
+.fullscreen {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  width: 100% !important;
-  height: 100px !important;
+  width: 100vw !important;
+  height: 100vh !important;
   margin: 0 !important;
   z-index: 100;
 }
@@ -146,7 +252,7 @@ const handleChangeTheme = () => {
 
 .screen-header {
   width: 100%;
-  height: 64px;
+  height: 8%;
   font-size: 20px;
   position: relative;
   > div {
@@ -155,6 +261,38 @@ const handleChangeTheme = () => {
     }
   }
   .title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 20px;
+    transform: translate(-50%, -50%);
+  }
+  .title-right {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-80%);
+  }
+  .qiehuan {
+    width: 28px;
+    height: 21px;
+    cursor: pointer;
+  }
+  .datetime {
+    font-size: 15px;
+    margin-left: 10px;
+  }
+  .logo {
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    transform: translateY(-80%);
+    img {
+      height: 35px;
+      width: 128px;
+    }
   }
 }
 .screen-body {
@@ -207,5 +345,11 @@ const handleChangeTheme = () => {
       position: relative;
     }
   }
+}
+.resize {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
 }
 </style>

@@ -1,3 +1,5 @@
+import { SocketSendData } from "@/types/socket"
+
 export default class SocketService {
     /**
      * 单例设计模式
@@ -32,7 +34,7 @@ export default class SocketService {
 
         //连接成功的事件
         this.ws.onopen = () => {
-            console.log("连接服务端成功了！");
+            //console.log("连接服务端成功了！");
             this.connected = true
             this.connectRetryCount = 0; //重新连接次数重置为0
         }
@@ -40,7 +42,7 @@ export default class SocketService {
         //1.连接服务端失败
         //2.当连接成功后，服务器关闭的情况
         this.ws.onclose = () => {
-            console.log("连接服务端失败");
+            //console.log("连接服务端失败");
             this.connected = false
             this.connectRetryCount++;
             setTimeout(() => { 
@@ -50,8 +52,8 @@ export default class SocketService {
 
         //得到服务端传来的数据
         this.ws.onmessage = (msg) => {
-            console.log("从服务端获取到了数据");
-            // console.log(msg.data);
+            //console.log("从服务端获取到了数据");
+            // console.log(msg.data);ss
             const recvData = JSON.parse(msg.data)
             const socketType = recvData.socketType
             //判断回调函数是否存在
@@ -61,7 +63,7 @@ export default class SocketService {
                     const realData = JSON.parse(recvData.data);
                     this.callbackMapping[socketType].call(this,realData)
                 } else if (action === 'fullScreen') {
-                    //TODO:
+                    this.callbackMapping[socketType].call(this, recvData);
                 } else if (action === 'themeChange') {
                     //TODO:
                 }
@@ -78,7 +80,7 @@ export default class SocketService {
     }
 
     //发送数据的方法 (重发数据的机制)
-    send(data: Record<any, any>) {
+    send(data: SocketSendData) {
         if (this.connected) {
             this.ws?.send(JSON.stringify(data))
         }

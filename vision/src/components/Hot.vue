@@ -8,21 +8,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, onUnmounted, onUpdated, computed } from "vue";
+import {
+  ref,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+  computed,
+  reactive,
+  defineExpose,
+  watch,
+} from "vue";
 import { ECharts, EChartsOption } from "echarts";
 import { render } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
+import { useMainStore } from "@/store";
+import { getThemeValue } from "@/utils/theme_utils";
 // import { $ref } from "vue/macros";
 const hot_ref = ref<HTMLElement | null>(null);
-const instance = ref<ECharts | null>(null);
-const allData = ref<Array<Record<string, any>> | null>(null);
+let instance: ECharts | null = null;
+let allData = reactive<Array<any>>([]);
 const currentIndex = ref(0);
 
 const catName = computed(() => {
-  if (!allData.value) {
+  if (!allData) {
     return "";
   } else {
-    return allData.value?.[currentIndex.value].name;
+    return allData?.[currentIndex.value]?.name;
   }
 });
 
@@ -31,7 +43,20 @@ const titleFontSize = ref(0);
 const comStyle = computed(() => {
   return {
     fontSize: titleFontSize.value + "px",
+    color: getThemeValue(theme.value).titleColor,
   };
+});
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
 });
 
 onBeforeMount(() => {
@@ -48,6 +73,7 @@ onMounted(() => {
     value: "",
   });
   window.addEventListener("resize", screenAdapter);
+  screenAdapter();
 });
 
 onUpdated(() => {
@@ -61,7 +87,7 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = () => {
-  instance.value = render(hot_ref.value, "chalk");
+  instance = render(hot_ref.value, theme.value);
   const initOption: EChartsOption = {
     title: {
       text: "▎ 热销商品占比",
@@ -74,9 +100,7 @@ const initChart = () => {
     },
     tooltip: {
       show: true,
-      formatter: (arg) => {
-        // console.log(arg);
-        //@ts-ignore
+      formatter: (arg: any) => {
         const thirdCategory = arg.data.children;
         let total = 0;
         thirdCategory.forEach((item: any) => {
@@ -108,23 +132,21 @@ const initChart = () => {
       },
     ],
   };
-  instance.value?.setOption(initOption);
+  instance?.setOption(initOption);
 };
 
 const getData = async (ret: any) => {
-  allData.value = ret;
-  //   console.log(allData);
+  allData = ret;
   updateChart();
-  screenAdapter();
 };
 
 const updateChart = () => {
-  // instance.value?.clear();
+  // instance?.clear();
   //处理图表需要的数据
-  const legendData = allData.value?.[currentIndex.value].children.map(
+  const legendData = allData?.[currentIndex.value]?.children.map(
     (item: any) => item.name
   );
-  const seriesData = allData.value?.[currentIndex.value].children.map((item: any) => {
+  const seriesData = allData?.[currentIndex.value]?.children.map((item: any) => {
     return {
       name: item.name,
       value: item.value,
@@ -142,7 +164,7 @@ const updateChart = () => {
       data: legendData,
     },
   };
-  instance.value?.setOption(dataOption);
+  instance?.setOption(dataOption);
 };
 
 const screenAdapter = () => {
@@ -154,8 +176,8 @@ const screenAdapter = () => {
       },
     },
     legend: {
-      itemWidth: titleFontSize.value / 2,
-      itemHeight: titleFontSize.value / 2,
+      itemWidth: titleFontSize.value,
+      itemHeight: titleFontSize.value,
       itemGap: titleFontSize.value / 2,
       textStyle: {
         fontSize: titleFontSize.value,
@@ -168,24 +190,28 @@ const screenAdapter = () => {
       },
     ],
   };
-  instance.value?.setOption(adapterOption);
-  instance.value?.resize();
+  instance?.setOption(adapterOption);
+  instance?.resize();
 };
 
 const toLeft = () => {
   currentIndex.value--;
   if (currentIndex.value < 0) {
-    currentIndex.value = (allData.value?.length ?? 1) - 1;
+    currentIndex.value = (allData?.length ?? 1) - 1;
   }
   updateChart();
 };
 const toRight = () => {
   currentIndex.value++;
-  if (currentIndex.value > (allData.value?.length ?? 1) - 1) {
+  if (currentIndex.value > (allData?.length ?? 1) - 1) {
     currentIndex.value = 0;
   }
   updateChart();
 };
+
+defineExpose({
+  screenAdapter,
+});
 </script>
 
 <style lang="less" scoped>

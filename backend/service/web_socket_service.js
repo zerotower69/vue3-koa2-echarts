@@ -39,13 +39,14 @@ module.exports.listen = () => {
                     //需要在服务端获取到数据的基础之上，增加一个data的字段
                     //data所对应的值，就是某个json的内容
                     payload.data = ret;
-                    console.log(payload)
+                    //console.log(payload)
                     client.send(JSON.stringify(payload))
                 }
                 else {
+                    // console.log("message===>", payload);
                     //原封不动地将所收到的数据转发给每一个处于连接状态的客户端
                     wss.clients.forEach(client => {
-                        client.send(msg)
+                        client.send(JSON.stringify(payload))
                     })
                 }
             }

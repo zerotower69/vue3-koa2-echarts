@@ -1,16 +1,12 @@
-import { createStore } from 'vuex'
-
-export default createStore({
-  state: {
+import { defineStore } from 'pinia'
+export const useMainStore = defineStore({
+  id: 'main',
+  state: () => ({
     theme:'chalk'
-  },
-  mutations: {
-    changeTheme(state) {
-     return state.theme === 'chalk'? 'vintage':"chalk"
-    }
-  },
+  }),
   actions: {
-  },
-  modules: {
+    changeTheme() {
+      this.theme = this.theme === "chalk"? "vintage":"chalk"
+    }
   }
 })

@@ -1,7 +1,7 @@
 <template>
   <div class="com-container">
     <div class="title" :style="comStyle">
-      <span>{{ "┃ " + showTitle }}</span>
+      <span>{{ "▎ " + showTitle }}</span>
       <span
         class="iconfont title-icon"
         :style="comStyle"
@@ -24,10 +24,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, onUnmounted, computed, nextTick } from "vue";
-import { ECharts, graphic } from "echarts";
+import {
+  ref,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  computed,
+  watch,
+  defineExpose,
+} from "vue";
+import { ECharts, EChartsOption, graphic, SeriesOption } from "echarts";
 import { render } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
+import { useMainStore } from "@/store";
+import { getThemeValue } from "@/utils/theme_utils";
 // import { $ref } from "vue/macros";
 const trend = ref<HTMLElement | null>(null);
 let instance: ECharts | null = null;
@@ -36,20 +46,30 @@ let allData = ref<Record<any, any> | null>(null);
 let showChoice = ref(false);
 let choiceType = ref("map");
 const selectTypes = computed(() => {
-  if (allData.value?.type) {
-    return allData.value.type.filter((item: any) => {
+  if (!allData.value) {
+    return [];
+  } else {
+    return allData.value?.type.filter((item: any) => {
       return item.key !== choiceType.value;
     });
   }
-  return [];
 });
 const showTitle = computed(() => {
-  return !allData.value ? "" : allData.value[choiceType.value].title;
+  if (!allData.value) {
+    return "";
+  } else {
+    const item = allData.value.type.filter((item: any) => {
+      return item.key === choiceType.value;
+    });
+    return item?.[0].text;
+  }
 });
+
 //设置给标题的样式
 const comStyle = computed(() => {
   return {
     fontSize: titleFontSize.value + "px",
+    color: getThemeValue(theme.value).titleColor,
   };
 });
 const marginStyle = computed(() => {
@@ -59,6 +79,18 @@ const marginStyle = computed(() => {
 });
 //标题额字体大小
 const titleFontSize = ref(0);
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
+});
 onBeforeMount(() => {
   useSocket()?.registerCallback("trendData", getData);
 });
@@ -82,8 +114,8 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = () => {
-  instance = render(trend.value, "chalk");
-  const initOption = {
+  instance = render(trend.value, theme.value);
+  const initOption: EChartsOption = {
     grid: {
       left: "3%",
       top: "35%",
@@ -109,13 +141,12 @@ const initChart = () => {
     },
   };
   instance?.setOption(initOption);
+  screenAdapter();
 };
 
 const getData = async (ret: any) => {
   allData.value = ret;
-  console.log(allData.value, selectTypes.value);
   updateChart();
-  screenAdapter();
 };
 
 const updateChart = () => {
@@ -140,7 +171,7 @@ const updateChart = () => {
   const timeArr = val?.common.month; //类目轴的数据
   const valueArr = val?.[choiceType.value].data; //数值轴的数据
   const seriesArr = valueArr.map((item: any, index: number) => {
-    return {
+    const options: SeriesOption = {
       name: item.name,
       type: "line",
       data: item.data,
@@ -158,12 +189,13 @@ const updateChart = () => {
         ]),
       },
     };
+    return options;
   });
   //图例的数据
   const legendArr = valueArr.map((item: any) => {
     return item.name;
   });
-  const dataOption = {
+  const dataOption: EChartsOption = {
     xAxis: {
       data: timeArr,
     },
@@ -177,21 +209,19 @@ const updateChart = () => {
 
 const screenAdapter = () => {
   //不用nextTick无法获取正确的标题宽度
-  nextTick(() => {
-    titleFontSize.value = ((trend.value?.offsetWidth ?? 0) / 100) * 3.6;
-    const adapterOption = {
-      legend: {
-        itemWidth: titleFontSize.value,
-        itemHeight: titleFontSize.value,
-        itemGap: titleFontSize.value,
-        textStyle: {
-          fontSize: titleFontSize.value / 2,
-        },
+  titleFontSize.value = ((trend.value?.offsetWidth ?? 0) / 100) * 3.6;
+  const adapterOption: EChartsOption = {
+    legend: {
+      itemWidth: titleFontSize.value,
+      itemHeight: titleFontSize.value,
+      itemGap: titleFontSize.value,
+      textStyle: {
+        fontSize: titleFontSize.value / 2,
       },
-    };
-    instance?.setOption(adapterOption);
-    instance?.resize();
-  });
+    },
+  };
+  instance?.setOption(adapterOption);
+  instance?.resize();
 };
 
 const handleSelect = (currentType: string) => {
@@ -199,6 +229,9 @@ const handleSelect = (currentType: string) => {
   updateChart();
   showChoice.value = false;
 };
+defineExpose({
+  screenAdapter,
+});
 </script>
 
 <style lang="less" scoped>

@@ -5,18 +5,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, onUnmounted, onUpdated, nextTick } from "vue";
-import { ECharts, EChartsOption, graphic, number, time } from "echarts";
+import {
+  ref,
+  reactive,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+  defineExpose,
+  watch,
+} from "vue";
+import { ECharts, EChartsOption, graphic } from "echarts";
 import { render } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
+import { useMainStore } from "@/store";
+import { computed } from "@vue/reactivity";
 // import { $ref } from "vue/macros";
 const rank_ref = ref<HTMLElement | null>(null);
 let instance: ECharts | null = null;
-let allData = ref<Array<Record<string, any>> | null>(null);
+let allData = reactive<Array<Record<string, any>>>([]);
 
 const startValue = ref(0);
 const endValue = ref(9);
 const timer = ref<number | null>(null);
+
+const theme = computed(() => useMainStore().theme);
+watch(theme, (value) => {
+  //先销毁这个图表
+  instance?.dispose();
+  //重新渲染图表,加载新的主题
+  initChart();
+  //完成屏幕的适配工作
+  screenAdapter();
+  //更新图表的展示
+  updateChart();
+});
 
 onBeforeMount(() => {
   useSocket()?.registerCallback("rankData", getData);
@@ -49,7 +72,7 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = () => {
-  instance = render(rank_ref.value, "chalk");
+  instance = render(rank_ref.value, theme.value);
   const initOption: EChartsOption = {
     title: {
       text: "▎ 地区销售排行",
@@ -90,7 +113,7 @@ const initChart = () => {
 };
 
 const getData = async (ret: any) => {
-  allData.value = ret;
+  allData = ret;
   //   console.log(allData);
   updateChart();
   startInterVal();
@@ -104,11 +127,11 @@ const updateChart = () => {
     ["#5052EE", "#AB6EE5"],
   ];
   //对数据从大到小排序
-  allData.value?.sort((a: any, b: any) => b.value - a.value);
+  allData?.sort((a: any, b: any) => b.value - a.value);
   //获得省份的信息数组
-  const provinceArr = allData.value?.map((item: any) => item.name);
+  const provinceArr = allData?.map((item: any) => item.name);
   //所有省份的销售金额
-  const valueArr = allData.value?.map((item: any) => item.value);
+  const valueArr = allData?.map((item: any) => item.value);
   const dataOption: EChartsOption = {
     xAxis: {
       data: provinceArr,
@@ -171,11 +194,14 @@ const startInterVal = () => {
   timer.value = setInterval(() => {
     startValue.value++;
     endValue.value++;
-    if (endValue.value > (allData.value?.length ?? 1) - 1) {
+    if (endValue.value > (allData?.length ?? 1) - 1) {
       startValue.value = 0;
       endValue.value = 9;
     }
     updateChart();
   }, 3000);
 };
+defineExpose({
+  screenAdapter,
+});
 </script>

@@ -1,0 +1,1 @@
+export type ChartName = "hot"|"map"|"trend"|"rank"|"stock"|"seller"
