@@ -14,7 +14,7 @@ import { render } from "@/utils/chart";
 import { useSocket } from "@/utils/socket_service";
 // import { $ref } from "vue/macros";
 const hot_ref = ref<HTMLElement | null>(null);
-let instance: ECharts | null = null;
+const instance = ref<ECharts | null>(null);
 const allData = ref<Array<Record<string, any>> | null>(null);
 const currentIndex = ref(0);
 
@@ -61,7 +61,7 @@ onUnmounted(() => {
 
 //init the chart
 const initChart = () => {
-  instance = render(hot_ref.value, "chalk");
+  instance.value = render(hot_ref.value, "chalk");
   const initOption: EChartsOption = {
     title: {
       text: "▎ 热销商品占比",
@@ -108,7 +108,7 @@ const initChart = () => {
       },
     ],
   };
-  instance?.setOption(initOption);
+  instance.value?.setOption(initOption);
 };
 
 const getData = async (ret: any) => {
@@ -119,6 +119,7 @@ const getData = async (ret: any) => {
 };
 
 const updateChart = () => {
+  // instance.value?.clear();
   //处理图表需要的数据
   const legendData = allData.value?.[currentIndex.value].children.map(
     (item: any) => item.name
@@ -141,7 +142,7 @@ const updateChart = () => {
       data: legendData,
     },
   };
-  instance?.setOption(dataOption);
+  instance.value?.setOption(dataOption);
 };
 
 const screenAdapter = () => {
@@ -167,8 +168,8 @@ const screenAdapter = () => {
       },
     ],
   };
-  instance?.setOption(adapterOption);
-  instance?.resize();
+  instance.value?.setOption(adapterOption);
+  instance.value?.resize();
 };
 
 const toLeft = () => {

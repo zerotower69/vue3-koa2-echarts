@@ -42,9 +42,13 @@ const initChart = async () => {
   instance = render(mapEl.value, "chalk");
   //获取中国地图的矢量数据
   //由于我们的数据放在前台而不是koa2,
-  const ret = await axios.get("http://localhost:8999/static/map/china.json");
-  console.log(ret);
-  addMap("china", ret.data);
+  const ret = await (
+    await fetch("/static/map/china.json", {
+      mode: "no-cors",
+      method: "get",
+    })
+  ).json(); //连续两个promise，所以这样写
+  addMap("china", ret);
   const initOption = {
     title: {
       text: "▎ 商家分布",
@@ -82,13 +86,15 @@ const initChart = async () => {
     //获取对应地图的矢量数据
     //判断当前所点击这个省份的矢量数据是否已经存在于mapData中
     if (!mapData[provinceInfo.key]) {
-      axios.get("http://localhost:8999" + provinceInfo.path).then((resp) => {
-        //   console.log(resp);
-        const ret = resp;
-        addMap(provinceInfo.key, ret.data);
-        mapData[provinceInfo.key] = ret.data;
-        instance?.setOption(changeOption);
-      });
+      fetch(provinceInfo.path)
+        .then((resp) => resp.json())
+        .then((resp) => {
+          //   console.log(resp);
+          const ret = resp;
+          addMap(provinceInfo.key, ret);
+          mapData[provinceInfo.key] = ret;
+          instance?.setOption(changeOption);
+        });
     } else {
       instance?.setOption(changeOption);
     }
@@ -97,7 +103,6 @@ const initChart = async () => {
 
 const getData = async (ret: any) => {
   allData = ret;
-  //   console.log(allData);
   updateChart();
   screenAdapter();
 };

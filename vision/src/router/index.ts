@@ -3,9 +3,13 @@ import { createRouter, createWebHistory,createWebHashHistory, RouteRecordRaw } f
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    component: () => import('@/views/Home.vue'),
-    name: 'Home'
-  }, {
+    redirect:'/screen'
+  },
+  {
+    path: "/screen",
+    component:()=>import('@/views/ScreenPage.vue')
+  },
+  {
     path: '/sellerpage',
     component: () => import('@/views/SellerPage.vue')
   },
@@ -22,6 +26,9 @@ const routes: Array<RouteRecordRaw> = [
   }, {
     path: '/hotPage',
     component:()=>import('@/views/HotPage.vue')
+  }, {
+    path: '/stockPage',
+    component:()=>import('@/views/StockPage.vue')
   }
 ]
 
