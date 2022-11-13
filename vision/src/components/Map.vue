@@ -67,7 +67,7 @@ const initChart = async () => {
   //获取中国地图的矢量数据
   //由于我们的数据放在前台而不是koa2,
   const ret = await (
-    await fetch("/static/map/china.json", {
+    await fetch("./static/map/china.json", {
       mode: "no-cors",
       method: "get",
     })
@@ -110,7 +110,7 @@ const initChart = async () => {
     //获取对应地图的矢量数据
     //判断当前所点击这个省份的矢量数据是否已经存在于mapData中
     if (!mapData[provinceInfo.key]) {
-      fetch(provinceInfo.path)
+      fetch("." + provinceInfo.path)
         .then((resp) => resp.json())
         .then((resp) => {
           //   console.log(resp);

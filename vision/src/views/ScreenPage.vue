@@ -155,11 +155,11 @@ onUnmounted(() => {
 });
 
 const theme = computed(() => useMainStore().theme);
-const logoSrc = computed(() => "/static/img/" + getThemeValue(theme.value).logoSrc);
+const logoSrc = computed(() => "./static/img/" + getThemeValue(theme.value).logoSrc);
 const headerSrc = computed(
-  () => "/static/img/" + getThemeValue(theme.value).headerBorderSrc
+  () => "./static/img/" + getThemeValue(theme.value).headerBorderSrc
 );
-const themeSrc = computed(() => "/static/img/" + getThemeValue(theme.value).themeSrc);
+const themeSrc = computed(() => "./static/img/" + getThemeValue(theme.value).themeSrc);
 
 const datetime = computed(() => {
   const dateObj = new Date();

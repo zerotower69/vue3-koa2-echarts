@@ -3,7 +3,7 @@ const WebSocket = require('ws')
 const path = require('path')
 const fileUtils = require('../utils/file_utils')
 const wss = new WebSocket.Server({
-    port: 9998
+    port: 9000
 });
 
 /**

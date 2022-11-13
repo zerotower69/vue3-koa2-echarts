@@ -5,10 +5,15 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
-
+const { default: sslify,
+  xForwardedProtoResolver: resolver
+} = require('koa-sslify')
+//跨域的配置
+const cors = require('koa2-cors')
+//使用 sslify配置ssl
+// app.use(sslify())
 // error handler
 onerror(app)
-
 // middlewares
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
@@ -16,9 +21,14 @@ app.use(bodyparser({
 app.use(json())
 app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
-
 app.use(views(__dirname + '/views', {
   extension: 'pug'
+}))
+
+app.use(cors({
+  origin: function (ctx) {
+    return ctx.header.origin;
+  }
 }))
 
 // logger

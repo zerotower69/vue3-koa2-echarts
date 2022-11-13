@@ -30,8 +30,8 @@ export default class SocketService {
         if (!window.WebSocket) {
             return console.log('您的浏览器不支持WebSocket!')
         }
-        this.ws = new WebSocket('ws://192.168.2.87:9998'); //然后在main.ts中引入使用
-
+        // this.ws = new WebSocket('wss://www.wugenquan.cn/socket/'); //然后在main.ts中引入使用
+        this.ws=new WebSocket(process.env.VUE_APP_SOCKET_URL)
         //连接成功的事件
         this.ws.onopen = () => {
             //console.log("连接服务端成功了！");

@@ -4,25 +4,52 @@
   "private": true,
   "scripts": {
     "start": "node bin/www",
-    "dev": "./node_modules/.bin/nodemon bin/www",
-    "prd": "pm2 start bin/www",
+    "webpack:start":"",
+    "start:dist": "npm-run-all -p watch debug",
+    "dev": "npx nodemon --exec bin/www",
+    "webpack:dev":"cross-env NODE_ENV=development webpack --watch --config config/webpack.config.dev.js --progress",
+
+    "webpack:debug": "node --inspect-brk npx webpack --config config/webpack.config.prod.js --progress",
+    "watch": "cross-env NODE_ENV=development webpack --watch --config config/webpack.config.dev.js --progress",
     "deploy": "cloudbase framework deploy",
-    "deploy:server": "cloudbase framework deploy node"
+    "deploy:server": "cloudbase framework deploy node",
+    "build": "cross-env NODE_ENV=production webpack --config config/webpack.config.prod.js",
+    "run:prod": "npm-run-all -p build pm2"
   },
   "dependencies": {
+    "consola": "^2.15.3",
     "debug": "^4.1.1",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-convert": "^1.2.0",
+    "koa-cors": "^0.0.16",
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.0",
     "koa-onerror": "^4.1.0",
     "koa-router": "^7.4.0",
+    "koa-sslify": "^5.0.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
-    "pug": "^2.0.3"
+    "koa2-cors": "^2.0.6",
+    "pug": "^2.0.3",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "@babel/core": "^7.20.2",
+    "@babel/node": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "babel-loader": "^9.1.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "cross-env": "^7.0.3",
+    "nodemon": "^1.19.4",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "terser-webpack-plugin": "^5.3.6",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-merge": "^5.8.0",
+    "webpack-node-externals": "^3.0.0"
   }
 }

@@ -2,13 +2,13 @@
   "version": "2.0",
   "envId": "blog-4gir71iy91260846",
   "framework": {
-    "name": "koa-starter",
+    "name": "koa-echarts-vision",
     "plugins": {
       "node": {
         "use": "@cloudbase/framework-plugin-node",
         "inputs": {
-          "name": "koa-starter",
-          "path": "/koa-starter"
+          "name": "koa-echarts-vision",
+          "path": "/vision"
         }
       }
     }

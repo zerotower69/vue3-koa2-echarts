@@ -3,6 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests"
+    /> -->
+    <!-- 浏览器不缓存当前网页 -->
+    <meta http-equiv="cache-control" content="no-cache" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= htmlWebpackPlugin.options.title %></title>
@@ -16,8 +22,6 @@
       >
     </noscript>
     <div id="app"></div>
-    <!-- import theme files -->
-    <script src="./static/theme/chalk.js"></script>
     <!-- built files will be auto injected -->
   </body>
 </html>

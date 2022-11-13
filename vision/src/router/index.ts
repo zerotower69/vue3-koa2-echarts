@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory,createWebHashHistory, RouteRecordRaw } from 'vue-router'
-
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -8,7 +7,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/screen",
     component:()=>import('@/views/ScreenPage.vue')
-  },
+  }
+]
+
+const devRoutes: Array<RouteRecordRaw> = [
   {
     path: '/sellerpage',
     component: () => import('@/views/SellerPage.vue')
@@ -32,9 +34,11 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
+const IS_PROD = process.env.NODE_ENV === "development";
+
 const router = createRouter({
   history: createWebHashHistory(process.env.BASE_URL),
-  routes
+  routes:IS_PROD? routes:routes.concat(devRoutes)
 })
 
 export default router
